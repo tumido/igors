@@ -27,7 +27,7 @@ def main():
     try:
         while True:
             humidity, temperature = get_data()
-            LOGGER.info(f"temp={temperature} humidity={humidity}")
+            LOGGER.info(f"temp={temperature:0.1f} humidity={humidity:0.1f}")
             with open(f"{PATH}/temp", "w") as f:
                 f.write(f"{temperature}\n")
             with open(f"{PATH}/humidity", "w") as f:

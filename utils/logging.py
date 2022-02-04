@@ -1,4 +1,3 @@
-import os
 import logging
 
 from utils.environment import is_rpi

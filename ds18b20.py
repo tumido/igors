@@ -30,7 +30,7 @@ def main():
     try:
         while True:
             temperature = get_data()
-            LOGGER.info(f"temp={temperature}")
+            LOGGER.info(f"temp={temperature:0.1f}")
             with open(f"{PATH}/temp", "w") as f:
                 f.write(f"{temperature}\n")
             sleep(10)
