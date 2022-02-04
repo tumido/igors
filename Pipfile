@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 pillow = "*"
 python-dotenv = "*"
-numpy = "*"
 
 [dev-packages]
 black = "*"
