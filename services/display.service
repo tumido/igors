@@ -1,0 +1,11 @@
+[Unit]
+Description=Display Igor
+
+[Service]
+User=thewatch
+WorkingDirectory=/opt/igors
+ExecStart=python display.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

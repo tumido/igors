@@ -1,0 +1,11 @@
+[Unit]
+Description=DS18B20 Igor
+
+[Service]
+User=thewatch
+WorkingDirectory=/opt/igors
+ExecStart=python ds18b20.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

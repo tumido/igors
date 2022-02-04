@@ -1,0 +1,11 @@
+[Unit]
+Description=DHT22 Igor
+
+[Service]
+User=thewatch
+WorkingDirectory=/opt/igors
+ExecStart=python dht22.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
