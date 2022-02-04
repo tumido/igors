@@ -1,7 +1,4 @@
-all: install fonts
-
-install:
-	pipenv install
+all: fonts
 
 debug:
 	kstart5 --ontop okular test.png

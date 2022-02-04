@@ -1,4 +1,3 @@
-import os
 from time import sleep
 from typing import Callable, Any
 from PIL import Image, ImageDraw, ImageFont
@@ -28,15 +27,30 @@ def utf(b: bytes) -> str:
 
 
 class Display:
+    FULL_UPDATE = epd2in13_V2.EPD.FULL_UPDATE
+    PART_UPDATE = epd2in13_V2.EPD.PART_UPDATE
+
     def __init__(self):
         self.height = epd2in13_V2.EPD_HEIGHT
         self.width = epd2in13_V2.EPD_WIDTH
+
+    def init(self, _mode: int):
+        pass
+
+    def display(self, _image: Image.Image):
+        pass
+
+    def displayPartBaseImage(self, _image: Image.Image):
+        pass
 
     def displayPartial(self, image: Image.Image):
         image.save("test.png")
 
     def getbuffer(self, image: Image.Image) -> Image.Image:
         return image
+
+    def Clear(self, _color: int):
+        pass
 
 
 DISPLAY = epd2in13_V2.EPD() if is_rpi() else Display()
@@ -63,6 +77,9 @@ def get_sensor_data(
 
 
 def main():
+    DISPLAY.init(DISPLAY.FULL_UPDATE)  # type: ignore
+    DISPLAY.Clear(0xFF)  # type: ignore
+
     LOGGER.info("Drawing template")
     DRAW.text((90, 16), "°C", font=BITTER_20)  # type: ignore
     DRAW.line((3, 50, DISPLAY.width - 3, 50))
@@ -75,7 +92,9 @@ def main():
     DRAW.text((82, 128), "%", font=BITTER_20)  # type: ignore
     DRAW.text((10, 180), "Topení", font=NOTO)  # type: ignore
 
-    draw()
+    DISPLAY.display(DISPLAY.getbuffer(IMAGE))  # type: ignore
+    DISPLAY.displayPartBaseImage(DISPLAY.getbuffer(IMAGE))  # type: ignore
+    DISPLAY.init(DISPLAY.PART_UPDATE)  # type: ignore
 
     LOGGER.info("Serving content")
     ds_temp, dht_temp, dht_humidity, heat = (0, 0, 0, None)
