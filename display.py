@@ -52,16 +52,15 @@ class Display:
     def Clear(self, _color: int):
         pass
 
+    def sleep(self):
+        pass
+
 
 DISPLAY = epd2in13_V2.EPD() if is_rpi() else Display()
 
 
 IMAGE = Image.new("1", (DISPLAY.width, DISPLAY.height), 255)
 DRAW = ImageDraw.Draw(IMAGE)
-
-
-def draw():
-    DISPLAY.displayPartial(DISPLAY.getbuffer(IMAGE))  # type: ignore
 
 
 def get_sensor_data(
@@ -79,6 +78,8 @@ def get_sensor_data(
 def main():
     DISPLAY.init(DISPLAY.FULL_UPDATE)  # type: ignore
     DISPLAY.Clear(0xFF)  # type: ignore
+    DISPLAY.displayPartBaseImage(DISPLAY.getbuffer(IMAGE))  # type: ignore
+    DISPLAY.init(DISPLAY.PART_UPDATE)  # type: ignore
 
     LOGGER.info("Drawing template")
     DRAW.text((90, 16), "°C", font=BITTER_20)  # type: ignore
@@ -92,63 +93,73 @@ def main():
     DRAW.text((82, 128), "%", font=BITTER_20)  # type: ignore
     DRAW.text((10, 180), "Topení", font=NOTO)  # type: ignore
 
-    DISPLAY.display(DISPLAY.getbuffer(IMAGE))  # type: ignore
-    DISPLAY.displayPartBaseImage(DISPLAY.getbuffer(IMAGE))  # type: ignore
-    DISPLAY.init(DISPLAY.PART_UPDATE)  # type: ignore
-
     LOGGER.info("Serving content")
     ds_temp, dht_temp, dht_humidity, heat = (0, 0, 0, None)
-    while True:
-        ds_temp_new = get_sensor_data("/tmp/ds/temp")
-        dht_temp_new = get_sensor_data("/tmp/dht/temp")
-        dht_humidity_new = get_sensor_data("/tmp/dht/humidity")
-        history = get_sensor_data("/tmp/dht/hist", lambda m: deque(m, maxlen=100))
-        heat_new = get_sensor_data("/tmp/relay/on", val=lambda m: m == "true\n")
+    try:
+        while True:
+            ds_temp_new = get_sensor_data("/tmp/ds/temp")
+            dht_temp_new = get_sensor_data("/tmp/dht/temp")
+            dht_humidity_new = get_sensor_data("/tmp/dht/humidity")
+            history = get_sensor_data("/tmp/dht/hist", lambda m: deque(m, maxlen=100))
+            heat_new = get_sensor_data("/tmp/relay/on", val=lambda m: m == "true\n")
 
-        if dht_temp != dht_temp_new:
-            DRAW.rectangle((12, 5, 88, 48), fill=1)
-            dht_temp = dht_temp_new
-            DRAW.text(  # type: ignore
-                (12, -10),
-                f"{dht_temp:0.1f}",
-                font=BITTER_40,
+            if dht_temp != dht_temp_new:
+                DRAW.rectangle((12, 5, 88, 48), fill=1)
+                dht_temp = dht_temp_new
+                DRAW.text(  # type: ignore
+                    (12, -10),
+                    f"{dht_temp:0.1f}",
+                    font=BITTER_40,
+                )
+
+            if ds_temp != ds_temp_new:
+                DRAW.rectangle((12, 65, 88, 108), fill=1)
+                ds_temp = ds_temp_new
+                DRAW.text(  # type: ignore
+                    (12, 48),
+                    f"{ds_temp:0.1f}",
+                    font=BITTER_40,
+                )
+
+            if dht_humidity != dht_humidity_new:
+                dht_humidity = dht_humidity_new
+                DRAW.rectangle((35, 125, 80, 155), fill=1)
+                DRAW.text(  # type: ignore
+                    (35, 105),
+                    f"{dht_humidity:0.0f}",
+                    font=BITTER_40,
+                )
+
+            if heat != heat_new:
+                heat = heat_new
+                DRAW.rounded_rectangle(
+                    (27, 200, 57, 214), radius=7, outline=0, fill=not heat
+                )
+                DRAW.text((35, 200), "On", font=NOTO, fill=heat)  # type: ignore
+                DRAW.rounded_rectangle(
+                    (65, 200, 95, 214), radius=7, outline=0, fill=heat
+                )
+                DRAW.text((72, 200), "Off", font=NOTO, fill=not heat)  # type: ignore
+
+            for idx, i in enumerate(history):
+                DRAW.point((idx + 10, 250 - round((i - 10))))
+
+            LOGGER.info(
+                f"above={dht_temp:0.1f} °C, below={ds_temp:0.1f} °C, humidity={dht_humidity:0.0f} %, heat={heat}, history={len(history)}"
             )
+            DISPLAY.displayPartial(DISPLAY.getbuffer(IMAGE))  # type: ignore
+            sleep(60)
 
-        if ds_temp != ds_temp_new:
-            DRAW.rectangle((12, 65, 88, 108), fill=1)
-            ds_temp = ds_temp_new
-            DRAW.text(  # type: ignore
-                (12, 48),
-                f"{ds_temp:0.1f}",
-                font=BITTER_40,
-            )
+    except KeyboardInterrupt:
+        LOGGER.info("exiting")
 
-        if dht_humidity != dht_humidity_new:
-            dht_humidity = dht_humidity_new
-            DRAW.rectangle((35, 125, 80, 155), fill=1)
-            DRAW.text(  # type: ignore
-                (35, 105),
-                f"{dht_humidity:0.0f}",
-                font=BITTER_40,
-            )
+    except Exception as e:
+        LOGGER.error(e)
 
-        if heat != heat_new:
-            heat = heat_new
-            DRAW.rounded_rectangle(
-                (27, 200, 57, 214), radius=7, outline=0, fill=not heat
-            )
-            DRAW.text((35, 200), "On", font=NOTO, fill=heat)  # type: ignore
-            DRAW.rounded_rectangle((65, 200, 95, 214), radius=7, outline=0, fill=heat)
-            DRAW.text((72, 200), "Off", font=NOTO, fill=not heat)  # type: ignore
-
-        for idx, i in enumerate(history):
-            DRAW.point((idx + 10, 250 - round((i - 10))))
-
-        LOGGER.info(
-            f"above={dht_temp:0.1f} °C, below={ds_temp:0.1f} °C, humidity={dht_humidity:0.0f} %, heat={heat}, history={len(history)}"
-        )
-        draw()
-        sleep(60)
+    finally:
+        DISPLAY.init(DISPLAY.FULL_UPDATE)  # type: ignore
+        DISPLAY.Clear(0xFF)  # type: ignore
+        DISPLAY.sleep()  # type: ignore
 
 
 if __name__ == "__main__":
