@@ -1,7 +1,7 @@
 import os
 from time import sleep
 from typing import Callable
-from utils.environment import is_rpi
+from utils.environment import SENSOR_POOLING, is_rpi
 from utils.logging import assert_mode, get_logger
 
 LOGGER = get_logger("ds18b20")
@@ -33,7 +33,7 @@ def main():
             LOGGER.info(f"temp={temperature:0.1f}")
             with open(f"{PATH}/temp", "w") as f:
                 f.write(f"{temperature}\n")
-            sleep(10)
+            sleep(SENSOR_POOLING)
     except KeyboardInterrupt:
         LOGGER.info("exiting")
     except Exception as e:

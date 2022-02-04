@@ -1,7 +1,7 @@
 import os
 from time import sleep
 from typing import Tuple
-from utils.environment import is_rpi
+from utils.environment import SENSOR_POOLING, is_rpi
 from utils.logging import assert_mode, get_logger
 
 LOGGER = get_logger("dht22")
@@ -35,7 +35,7 @@ def main():
             with open(f"{PATH}/history", "a") as f:
                 f.write(f"{temperature}\n")
 
-            sleep(10)
+            sleep(SENSOR_POOLING)
     except KeyboardInterrupt:
         LOGGER.info("exiting")
 

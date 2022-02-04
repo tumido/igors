@@ -2,7 +2,7 @@ from time import sleep
 from typing import Callable, Any
 from PIL import Image, ImageDraw, ImageFont
 from collections import deque
-from utils.environment import is_rpi
+from utils.environment import DISPLAY_REFRESH, is_rpi
 from waveshare_epd import epd2in13_V2
 from utils.logging import assert_mode, get_logger
 
@@ -148,7 +148,7 @@ def main():
                 f"above={dht_temp:0.1f} °C, below={ds_temp:0.1f} °C, humidity={dht_humidity:0.0f} %, heat={heat}, history={len(history)}"
             )
             DISPLAY.displayPartial(DISPLAY.getbuffer(IMAGE))  # type: ignore
-            sleep(60)
+            sleep(DISPLAY_REFRESH)
 
     except KeyboardInterrupt:
         LOGGER.info("exiting")
