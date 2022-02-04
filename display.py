@@ -2,12 +2,10 @@ import os
 from time import sleep
 from typing import Callable, Any
 from PIL import Image, ImageDraw, ImageFont
-from dotenv import load_dotenv
 from collections import deque
+from utils.environment import is_rpi
 from waveshare_epd import epd2in13_V2
 from utils.logging import assert_mode, get_logger
-
-load_dotenv()
 
 LOGGER = get_logger("display")
 
@@ -41,7 +39,7 @@ class Display:
         return image
 
 
-DISPLAY = epd2in13_V2.EPD() if os.getenv("ENV") == "production" else Display()
+DISPLAY = epd2in13_V2.EPD() if is_rpi() else Display()
 
 
 IMAGE = Image.new("1", (DISPLAY.width, DISPLAY.height), 255)
