@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 from dotenv import load_dotenv
 from collections import deque
 from waveshare_epd import epd2in13_V2
-from utils.logging import get_logger
+from utils.logging import assert_mode, get_logger
 
 load_dotenv()
 
@@ -135,4 +135,5 @@ def main():
 
 
 if __name__ == "__main__":
+    assert_mode(LOGGER)
     main()

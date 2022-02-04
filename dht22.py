@@ -1,7 +1,7 @@
 import os
 from time import sleep
 from typing import Tuple
-from utils.logging import get_logger
+from utils.logging import assert_mode, get_logger
 
 LOGGER = get_logger("dht22")
 PATH = "/tmp/dht"
@@ -43,5 +43,6 @@ def main():
 
 
 if __name__ == "__main__":
+    assert_mode(LOGGER)
     os.makedirs(PATH, exist_ok=True)
     main()
