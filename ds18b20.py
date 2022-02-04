@@ -1,6 +1,7 @@
 import os
 from time import sleep
 from typing import Callable
+from utils.environment import is_rpi
 from utils.logging import assert_mode, get_logger
 
 LOGGER = get_logger("ds18b20")
@@ -9,7 +10,7 @@ PATH = "/tmp/ds"
 
 
 def main():
-    if os.getenv("ENV") == "production":
+    if is_rpi():
         from w1thermsensor import W1ThermSensor  # type: ignore
         import RPi.GPIO as GPIO  # type: ignore
 
@@ -38,7 +39,7 @@ def main():
     except Exception as e:
         LOGGER.error(e)
     finally:
-        if os.getenv("ENV") == "production":
+        if is_rpi():
             GPIO.cleanup()  # type: ignore
 
 

@@ -1,6 +1,7 @@
 import os
 from time import sleep
 from typing import Tuple
+from utils.environment import is_rpi
 from utils.logging import assert_mode, get_logger
 
 LOGGER = get_logger("dht22")
@@ -8,7 +9,7 @@ PATH = "/tmp/dht"
 
 
 def main():
-    if os.getenv("ENV") == "production":
+    if is_rpi():
         import Adafruit_DHT  # type: ignore
 
         DHT_SENSOR = Adafruit_DHT.DHT22  # type: ignore
