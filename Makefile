@@ -1,4 +1,4 @@
-all: fonts
+all: install fonts
 
 install:
 	pipenv install
