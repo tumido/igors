@@ -1,3 +1,4 @@
+import sys
 from time import sleep
 from typing import Callable, Any
 from PIL import Image, ImageDraw, ImageFont
@@ -5,6 +6,7 @@ from collections import deque
 from utils.environment import DISPLAY_REFRESH, is_rpi
 from waveshare_epd import epd2in13_V2
 from utils.logging import assert_mode, get_logger
+import signal
 
 LOGGER = get_logger("display")
 
@@ -61,6 +63,18 @@ DISPLAY = epd2in13_V2.EPD() if is_rpi() else Display()
 
 IMAGE = Image.new("1", (DISPLAY.width, DISPLAY.height), 255)
 DRAW = ImageDraw.Draw(IMAGE)
+
+
+def exit(_signal: int = 0, _frame: Any = None):
+    LOGGER.info("Powering down display.")
+    DISPLAY.init(DISPLAY.FULL_UPDATE)  # type: ignore
+    DISPLAY.Clear(0xFF)  # type: ignore
+    DISPLAY.sleep()  # type: ignore
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, exit)
+signal.signal(signal.SIGINT, exit)
 
 
 def get_sensor_data(
@@ -155,11 +169,6 @@ def main():
 
     except Exception as e:
         LOGGER.error(e)
-
-    finally:
-        DISPLAY.init(DISPLAY.FULL_UPDATE)  # type: ignore
-        DISPLAY.Clear(0xFF)  # type: ignore
-        DISPLAY.sleep()  # type: ignore
 
 
 if __name__ == "__main__":
