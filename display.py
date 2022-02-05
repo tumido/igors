@@ -90,7 +90,14 @@ def get_sensor_data(
 
 
 def main():
+    # Reset and init
+    # Partial reset doesn't wait for BUSY - helps initialize after possible power outage
+    DISPLAY.init(DISPLAY.PART_UPDATE)  # type: ignore
+    # Now properly reset and clean
     DISPLAY.init(DISPLAY.FULL_UPDATE)  # type: ignore
+    DISPLAY.Clear(0xFF)  # type:ignore
+
+    # Prepare to draw
     DISPLAY.displayPartBaseImage(DISPLAY.getbuffer(IMAGE))  # type: ignore
     DISPLAY.init(DISPLAY.PART_UPDATE)  # type: ignore
 
