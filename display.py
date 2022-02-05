@@ -91,7 +91,6 @@ def get_sensor_data(
 
 def main():
     DISPLAY.init(DISPLAY.FULL_UPDATE)  # type: ignore
-    DISPLAY.Clear(0xFF)  # type: ignore
     DISPLAY.displayPartBaseImage(DISPLAY.getbuffer(IMAGE))  # type: ignore
     DISPLAY.init(DISPLAY.PART_UPDATE)  # type: ignore
 
