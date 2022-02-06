@@ -9,9 +9,7 @@ run:
 
 fonts:
 	mkdir -p fonts
-	wget https://use.fontawesome.com/releases/v6.0.0-beta3/fontawesome-free-6.0.0-beta3-desktop.zip
-	unzip -d fonts fontawesome-free-6.0.0-beta3-desktop.zip "fontawesome-free-6.0.0-beta3-desktop/otfs/*"
-	rm fontawesome-free-6.0.0-beta3-desktop.zip
+	wget -O fonts/MaterialIconsOutlined-Regular.otf https://raw.githubusercontent.com/google/material-design-icons/master/font/MaterialIconsOutlined-Regular.otf
 
 	wget -O noto.zip https://fonts.google.com/download\?family\=Noto%20Sans
 	unzip -d fonts noto.zip "NotoSans*.ttf"

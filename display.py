@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import sys
 from time import sleep
+from datetime import datetime
 from typing import Callable, Any, Optional
 from PIL import Image, ImageDraw, ImageFont
 from collections import deque
@@ -22,6 +23,10 @@ BITTER_20 = ImageFont.truetype(
 NOTO = ImageFont.truetype(
     "fonts/NotoSans-Regular.ttf",
     10,
+)
+MATERIAL_ICONS = ImageFont.truetype(
+    "fonts/MaterialIconsOutlined-Regular.otf",
+    13,
 )
 
 
@@ -98,9 +103,9 @@ class SensorOnDisplay:
 
 
 SENSORS = [
-    SensorOnDisplay(-10, "/tmp/ds/temp"),
-    SensorOnDisplay(48, "/tmp/dht/temp"),
-    SensorOnDisplay(105, "/tmp/dht/humidity"),
+    SensorOnDisplay(4, "/tmp/ds/temp"),
+    SensorOnDisplay(61, "/tmp/dht/temp"),
+    SensorOnDisplay(119, "/tmp/dht/humidity"),
 ]
 
 
@@ -117,6 +122,24 @@ def update_sensor(s: SensorOnDisplay):
         )
 
 
+WIFI = [b"\ue1da", b"\uebe4", b"\uebe1", b"\uf065"]
+
+
+def network_status():
+    with open("/proc/net/wireless") as f:
+        status = f.readlines()
+    if len(status) < 3:  # First 2 lines are header
+        return WIFI[0]
+
+    try:
+        strength = (
+            float(status[-1].split()[2]) / 70
+        )  # 3rd field is quality and 70 is max
+        return WIFI[round(2 * strength) + 1]
+    except:
+        return WIFI[0]
+
+
 def main():
     # Reset and init
     # Partial reset doesn't wait for BUSY - helps initialize after possible power outage
@@ -130,21 +153,26 @@ def main():
     DISPLAY.init(DISPLAY.PART_UPDATE)  # type: ignore
 
     LOGGER.info("Drawing template")
-    DRAW.text((90, 16), "°C", font=BITTER_20)  # type: ignore
-    DRAW.line((3, 50, DISPLAY.width - 3, 50))
+    DRAW.text((90, 30), "°C", font=BITTER_20)  # type: ignore
+    DRAW.line((3, 64, DISPLAY.width - 3, 64))
     for i in range(37):
-        DRAW.line((-10 + (i * 4), 60, 0 + (i * 4), 50))
+        DRAW.line((-10 + (i * 4), 74, 0 + (i * 4), 64))
     DRAW.line((0, 0, 0, 100), fill=1)
     DRAW.line((121, 0, 121, 110), fill=1)
-    DRAW.rounded_rectangle((1, 1, 120, 110), radius=8)
-    DRAW.text((90, 74), "°C", font=BITTER_20)  # type: ignore
-    DRAW.text((90, 128), "%", font=BITTER_20)  # type: ignore
+    DRAW.rounded_rectangle((1, 14, 120, 124), radius=8)
+    DRAW.text((90, 88), "°C", font=BITTER_20)  # type: ignore
+    DRAW.text((90, 144), "%", font=BITTER_20)  # type: ignore
     DRAW.text((10, 180), "Topení", font=NOTO)  # type: ignore
 
     LOGGER.info("Serving content")
     ds_temp, dht_temp, dht_humidity, heat = (0, 0, 0, None)
     try:
         while True:
+            now = datetime.now().strftime("%H:%M")
+            DRAW.rectangle((0, 0, DISPLAY.width, 13), fill=1)
+            DRAW.text((2, 0), now, font=NOTO)  # type: ignore
+            quality = network_status().decode("unicode-escape")
+            DRAW.text((105, 0), quality, font=MATERIAL_ICONS)  # type: ignore
 
             for s in SENSORS:
                 update_sensor(s)
