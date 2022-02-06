@@ -1,6 +1,7 @@
+from dataclasses import dataclass
 import sys
 from time import sleep
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 from PIL import Image, ImageDraw, ImageFont
 from collections import deque
 from utils.environment import DISPLAY_REFRESH, is_rpi
@@ -89,6 +90,33 @@ def get_sensor_data(
         return cast(map(val, [0]))  # type: ignore
 
 
+@dataclass
+class SensorOnDisplay:
+    position: int
+    path: str
+    value: Optional[float] = None
+
+
+SENSORS = [
+    SensorOnDisplay(-10, "/tmp/ds/temp"),
+    SensorOnDisplay(48, "/tmp/dht/temp"),
+    SensorOnDisplay(105, "/tmp/dht/humidity"),
+]
+
+
+def update_sensor(s: SensorOnDisplay):
+    new_value = get_sensor_data(s.path)
+    if not s.value or new_value != s.value:
+        DRAW.rectangle((4, 15 + s.position, 89, 58 + s.position), fill=1)
+        s.value = new_value
+        length = DRAW.textlength(f"{s.value:0.1f}", font=BITTER_40)
+        DRAW.text(  # type: ignore
+            (89 - length, s.position),
+            f"{s.value:0.1f}",
+            font=BITTER_40,
+        )
+
+
 def main():
     # Reset and init
     # Partial reset doesn't wait for BUSY - helps initialize after possible power outage
@@ -110,46 +138,18 @@ def main():
     DRAW.line((121, 0, 121, 110), fill=1)
     DRAW.rounded_rectangle((1, 1, 120, 110), radius=8)
     DRAW.text((90, 74), "°C", font=BITTER_20)  # type: ignore
-    DRAW.text((82, 128), "%", font=BITTER_20)  # type: ignore
+    DRAW.text((90, 128), "%", font=BITTER_20)  # type: ignore
     DRAW.text((10, 180), "Topení", font=NOTO)  # type: ignore
 
     LOGGER.info("Serving content")
     ds_temp, dht_temp, dht_humidity, heat = (0, 0, 0, None)
     try:
         while True:
-            ds_temp_new = get_sensor_data("/tmp/ds/temp")
-            dht_temp_new = get_sensor_data("/tmp/dht/temp")
-            dht_humidity_new = get_sensor_data("/tmp/dht/humidity")
-            history = get_sensor_data("/tmp/dht/hist", lambda m: deque(m, maxlen=100))
+
+            for s in SENSORS:
+                update_sensor(s)
+
             heat_new = get_sensor_data("/tmp/relay/on", val=lambda m: m == "true\n")
-
-            if dht_temp != dht_temp_new:
-                DRAW.rectangle((12, 5, 88, 48), fill=1)
-                dht_temp = dht_temp_new
-                DRAW.text(  # type: ignore
-                    (12, -10),
-                    f"{dht_temp:0.1f}",
-                    font=BITTER_40,
-                )
-
-            if ds_temp != ds_temp_new:
-                DRAW.rectangle((12, 65, 88, 108), fill=1)
-                ds_temp = ds_temp_new
-                DRAW.text(  # type: ignore
-                    (12, 48),
-                    f"{ds_temp:0.1f}",
-                    font=BITTER_40,
-                )
-
-            if dht_humidity != dht_humidity_new:
-                dht_humidity = dht_humidity_new
-                DRAW.rectangle((35, 125, 80, 155), fill=1)
-                DRAW.text(  # type: ignore
-                    (35, 105),
-                    f"{dht_humidity:0.0f}",
-                    font=BITTER_40,
-                )
-
             if heat != heat_new:
                 heat = heat_new
                 DRAW.rounded_rectangle(
@@ -161,6 +161,7 @@ def main():
                 )
                 DRAW.text((72, 200), "Off", font=NOTO, fill=not heat)  # type: ignore
 
+            history = get_sensor_data("/tmp/dht/hist", lambda m: deque(m, maxlen=100))
             for idx, i in enumerate(history):
                 DRAW.point((idx + 10, 250 - round((i - 10))))
 
@@ -168,6 +169,10 @@ def main():
                 f"above={dht_temp:0.1f} °C, below={ds_temp:0.1f} °C, humidity={dht_humidity:0.0f} %, heat={heat}, history={len(history)}"
             )
             DISPLAY.displayPartial(DISPLAY.getbuffer(IMAGE))  # type: ignore
+
+            # Do not loop on debug
+            if isinstance(DISPLAY, Display):
+                break
             sleep(DISPLAY_REFRESH)
 
     except KeyboardInterrupt:
