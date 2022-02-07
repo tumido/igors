@@ -151,15 +151,13 @@ def main():
     DRAW.line((0, 60, DISPLAY.width, 60))
     for i in range(37):
         DRAW.line((-10 + (i * 4), 70, 0 + (i * 4), 60))
-    # DRAW.line((0, 0, 0, 100), fill=1)
-    # DRAW.line((121, 0, 121, 110), fill=1)
-    DRAW.rounded_rectangle((0, 11, 122, 120), radius=8)
+    DRAW.rounded_rectangle((1, 11, 121, 120), radius=8)
     DRAW.text((90, 84), "°C", font=BITTER_20)  # type: ignore
     DRAW.text((90, 135), "%", font=BITTER_20)  # type: ignore
     DRAW.text((10, 170), "Topení", font=NOTO)  # type: ignore
 
     LOGGER.info("Serving content")
-    ds_temp, dht_temp, dht_humidity, heat = (0, 0, 0, None)
+    heat = None
     try:
         while True:
             now = datetime.now().strftime("%H:%M")
@@ -183,7 +181,9 @@ def main():
                 )
                 DRAW.text((72, 190), "Off", font=NOTO, fill=not heat)  # type: ignore
 
-            history = get_sensor_data("/tmp/dht/hist", lambda m: deque(m, maxlen=100))
+            history = get_sensor_data(
+                "/tmp/dht/history", lambda m: deque(m, maxlen=100)
+            )
             for idx, i in enumerate(history):
                 DRAW.point((idx + 10, 250 - round((i - 10))))
 
