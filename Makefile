@@ -7,6 +7,7 @@ run:
 	pipenv run python display.py
 	okular test.png
 
+.PHONY: fonts
 fonts:
 	mkdir -p fonts
 	wget -O fonts/MaterialIconsOutlined-Regular.otf https://raw.githubusercontent.com/google/material-design-icons/master/font/MaterialIconsOutlined-Regular.otf

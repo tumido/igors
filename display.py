@@ -28,10 +28,21 @@ MATERIAL_ICONS = ImageFont.truetype(
     "fonts/MaterialIconsOutlined-Regular.otf",
     13,
 )
+WIFI = [b"\ue1da", b"\uebe4", b"\uebe1", b"\uf065"]
 
 
-def utf(b: bytes) -> str:
-    return b.decode("unicode-escape")
+@dataclass
+class SensorOnDisplay:
+    position: int
+    path: str
+    value: Optional[float] = None
+
+
+SENSORS = [
+    SensorOnDisplay(4, "/tmp/ds/temp"),
+    SensorOnDisplay(61, "/tmp/dht/temp"),
+    SensorOnDisplay(119, "/tmp/dht/humidity"),
+]
 
 
 class Display:
@@ -95,20 +106,6 @@ def get_sensor_data(
         return cast(map(val, [0]))  # type: ignore
 
 
-@dataclass
-class SensorOnDisplay:
-    position: int
-    path: str
-    value: Optional[float] = None
-
-
-SENSORS = [
-    SensorOnDisplay(4, "/tmp/ds/temp"),
-    SensorOnDisplay(61, "/tmp/dht/temp"),
-    SensorOnDisplay(119, "/tmp/dht/humidity"),
-]
-
-
 def update_sensor(s: SensorOnDisplay):
     new_value = get_sensor_data(s.path)
     if not s.value or new_value != s.value:
@@ -120,9 +117,6 @@ def update_sensor(s: SensorOnDisplay):
             f"{s.value:0.1f}",
             font=BITTER_40,
         )
-
-
-WIFI = [b"\ue1da", b"\uebe4", b"\uebe1", b"\uf065"]
 
 
 def network_status():
