@@ -39,8 +39,8 @@ class SensorOnDisplay:
 
 
 SENSORS = [
-    SensorOnDisplay(0, "/tmp/ds/temp"),
-    SensorOnDisplay(57, "/tmp/dht/temp"),
+    SensorOnDisplay(0, "/tmp/dht/temp"),
+    SensorOnDisplay(57, "/tmp/ds/temp"),
     SensorOnDisplay(110, "/tmp/dht/humidity"),
 ]
 
@@ -188,7 +188,7 @@ def main():
                 DRAW.point((idx + 10, 250 - round((i - 10))))
 
             LOGGER.info(
-                f"above={dht_temp:0.1f} °C, below={ds_temp:0.1f} °C, humidity={dht_humidity:0.0f} %, heat={heat}, history={len(history)}"
+                f"above={SENSORS[0].value:0.1f} °C, below={SENSORS[1].value:0.1f} °C, humidity={SENSORS[2].value:0.0f} %, heat={heat}, history={len(history)}"
             )
             DISPLAY.displayPartial(DISPLAY.getbuffer(IMAGE))  # type: ignore
 
