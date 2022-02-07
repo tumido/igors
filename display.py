@@ -39,9 +39,9 @@ class SensorOnDisplay:
 
 
 SENSORS = [
-    SensorOnDisplay(4, "/tmp/ds/temp"),
-    SensorOnDisplay(61, "/tmp/dht/temp"),
-    SensorOnDisplay(119, "/tmp/dht/humidity"),
+    SensorOnDisplay(0, "/tmp/ds/temp"),
+    SensorOnDisplay(57, "/tmp/dht/temp"),
+    SensorOnDisplay(110, "/tmp/dht/humidity"),
 ]
 
 
@@ -148,25 +148,25 @@ def main():
 
     LOGGER.info("Drawing template")
     DRAW.text((90, 30), "°C", font=BITTER_20)  # type: ignore
-    DRAW.line((3, 64, DISPLAY.width - 3, 64))
+    DRAW.line((0, 60, DISPLAY.width, 60))
     for i in range(37):
-        DRAW.line((-10 + (i * 4), 74, 0 + (i * 4), 64))
-    DRAW.line((0, 0, 0, 100), fill=1)
-    DRAW.line((121, 0, 121, 110), fill=1)
-    DRAW.rounded_rectangle((1, 14, 120, 124), radius=8)
-    DRAW.text((90, 88), "°C", font=BITTER_20)  # type: ignore
-    DRAW.text((90, 144), "%", font=BITTER_20)  # type: ignore
-    DRAW.text((10, 180), "Topení", font=NOTO)  # type: ignore
+        DRAW.line((-10 + (i * 4), 70, 0 + (i * 4), 60))
+    # DRAW.line((0, 0, 0, 100), fill=1)
+    # DRAW.line((121, 0, 121, 110), fill=1)
+    DRAW.rounded_rectangle((0, 11, 122, 120), radius=8)
+    DRAW.text((90, 84), "°C", font=BITTER_20)  # type: ignore
+    DRAW.text((90, 135), "%", font=BITTER_20)  # type: ignore
+    DRAW.text((10, 170), "Topení", font=NOTO)  # type: ignore
 
     LOGGER.info("Serving content")
     ds_temp, dht_temp, dht_humidity, heat = (0, 0, 0, None)
     try:
         while True:
             now = datetime.now().strftime("%H:%M")
-            DRAW.rectangle((0, 0, DISPLAY.width, 13), fill=1)
-            DRAW.text((2, 0), now, font=NOTO)  # type: ignore
+            DRAW.rectangle((0, 0, DISPLAY.width, 10), fill=1)
+            DRAW.text((0, -3), now, font=NOTO)  # type: ignore
             quality = network_status().decode("unicode-escape")
-            DRAW.text((105, 0), quality, font=MATERIAL_ICONS)  # type: ignore
+            DRAW.text((110, -2), quality, font=MATERIAL_ICONS)  # type: ignore
 
             for s in SENSORS:
                 update_sensor(s)
@@ -175,13 +175,13 @@ def main():
             if heat != heat_new:
                 heat = heat_new
                 DRAW.rounded_rectangle(
-                    (27, 200, 57, 214), radius=7, outline=0, fill=not heat
+                    (27, 190, 57, 204), radius=7, outline=0, fill=not heat
                 )
-                DRAW.text((35, 200), "On", font=NOTO, fill=heat)  # type: ignore
+                DRAW.text((35, 190), "On", font=NOTO, fill=heat)  # type: ignore
                 DRAW.rounded_rectangle(
-                    (65, 200, 95, 214), radius=7, outline=0, fill=heat
+                    (65, 190, 95, 204), radius=7, outline=0, fill=heat
                 )
-                DRAW.text((72, 200), "Off", font=NOTO, fill=not heat)  # type: ignore
+                DRAW.text((72, 190), "Off", font=NOTO, fill=not heat)  # type: ignore
 
             history = get_sensor_data("/tmp/dht/hist", lambda m: deque(m, maxlen=100))
             for idx, i in enumerate(history):
