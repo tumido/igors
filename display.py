@@ -4,7 +4,6 @@ from time import sleep
 from datetime import datetime
 from typing import Callable, Any, Optional
 from PIL import Image, ImageDraw, ImageFont
-from collections import deque
 from utils.environment import DISPLAY_REFRESH, is_rpi
 from waveshare_epd import epd2in13_V2
 from utils.logging import assert_mode, get_logger
@@ -181,9 +180,7 @@ def main():
                 )
                 DRAW.text((72, 190), "Off", font=NOTO, fill=not heat)  # type: ignore
 
-            history = get_sensor_data(
-                "/tmp/dht/history", lambda m: deque(m, maxlen=100)
-            )
+            history = get_sensor_data("/tmp/dht/history", list)
             for idx, i in enumerate(history):
                 DRAW.point((idx + 10, 250 - round((i - 10))))
 

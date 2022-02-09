@@ -1,11 +1,14 @@
 import os
 from time import sleep
 from typing import Tuple
+from collections import deque
 from utils.environment import SENSOR_POOLING, is_rpi
 from utils.logging import assert_mode, get_logger
 
 LOGGER = get_logger("dht22")
 PATH = "/tmp/dht"
+
+HISTORY = deque([], maxlen=100)
 
 
 def main():
@@ -32,8 +35,10 @@ def main():
                 f.write(f"{temperature}\n")
             with open(f"{PATH}/humidity", "w") as f:
                 f.write(f"{humidity}\n")
-            with open(f"{PATH}/history", "a") as f:
-                f.write(f"{temperature}\n")
+
+            HISTORY.append(temperature)
+            with open(f"{PATH}/history", "w") as f:
+                f.write("\n".join(str(i) for i in HISTORY) + "\n")
 
             sleep(SENSOR_POOLING)
     except KeyboardInterrupt:
