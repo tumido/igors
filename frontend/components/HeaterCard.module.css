@@ -1,0 +1,38 @@
+.widget {
+  position: relative;
+  width: 287px;
+  height: 287px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+.widget::before {
+  content: '';
+  position: absolute;
+  top: 33px;
+  left: 64px;
+  width: 140px;
+  height: 200px;
+  background: #eee;
+  border-radius: 80px;
+  border: 10px solid #242424;
+  transform: skew(135deg, 45deg);
+}
+.on::before {
+  background: linear-gradient(-45deg, red, orange);
+}
+
+.value {
+  text-align: right;
+  font-size: 7rem;
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-weight: 400;
+  line-height: 1.167;
+  letter-spacing: -0.01562em;
+  margin-bottom: 0.35em;
+  z-index: 1;
+}
