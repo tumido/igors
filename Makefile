@@ -19,3 +19,10 @@ fonts:
 	wget -O bitter.zip https://www.huertatipografica.com/free_download/144
 	unzip -d fonts bitter.zip "Bitter*.ttf"
 	rm bitter.zip
+
+.node:
+	wget https://unofficial-builds.nodejs.org/download/release/v16.9.1/node-v16.9.1-linux-armv6l.tar.gz
+	tar -xzf node-v16.9.1-linux-armv6l.tar.gz
+	rm node-v16.9.1-linux-armv6l.tar.gz
+	cd node-v6.2.1-linux-armv6l/
+	sudo cp -R * /usr/local/

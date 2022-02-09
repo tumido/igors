@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import TimePicker from '../components/TimePicker'
-import useSWR, { useSWRConfig } from 'swr'
+import useSWR from 'swr'
 import { IgorsData } from './api/igors'
 import { Container, Grid } from '@mui/material'
 import WeatherCard, { WeatherCardProps } from '../components/WeatherCard'
@@ -9,7 +8,6 @@ import HeaterCard from '../components/HeaterCard'
 import GrassIcon from '@mui/icons-material/Grass'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
 import WaterIcon from '@mui/icons-material/Water'
-import { MouseEventHandler } from 'react'
 import ReportGmailerrorredOutlinedIcon from '@mui/icons-material/ReportGmailerrorredOutlined'
 import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined'
 import Loading from '../components/Loading'
@@ -24,19 +22,8 @@ async function fetcher<JSON = any>(
 
 const Home: NextPage = () => {
   const { data: igorsData, error } = useSWR<IgorsData>('/api/igors', fetcher)
-  const { mutate } = useSWRConfig()
   if (error) return <Loading icon={ReportGmailerrorredOutlinedIcon} />
   if (!igorsData) return <Loading icon={HourglassBottomOutlinedIcon} />
-
-  const handleHeaterChange: MouseEventHandler = (event) => {
-    fetch('/api/igors', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ heater: !igorsData.heater }),
-    }).then(() => mutate('/api/igors'))
-  }
 
   const values: WeatherCardProps[] = [
     { value: igorsData.above, type: 'temperature', icon: Brightness7Icon },
@@ -86,10 +73,7 @@ const Home: NextPage = () => {
                 justifyContent="center"
                 alignItems="center"
               >
-                <HeaterCard
-                  value={igorsData.heater}
-                  onClick={handleHeaterChange}
-                />
+                <HeaterCard value={igorsData.heater} />
               </Grid>
             </Grid>
           </Container>
