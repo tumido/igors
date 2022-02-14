@@ -1,12 +1,12 @@
-from dataclasses import dataclass
 import sys
 from time import sleep
 from datetime import datetime
-from typing import Callable, Any, Optional
+from typing import Any
 from PIL import Image, ImageDraw, ImageFont
 from utils.environment import DISPLAY_REFRESH, is_rpi
 from waveshare_epd import epd2in13_V2
 from utils.logging import assert_mode, get_logger
+from utils.sensors import DHT_HST, DHT_HUM, DHT_TEMP, DS_TEMP, HEATER_POWER, Sensor
 import signal
 
 LOGGER = get_logger("display")
@@ -30,17 +30,10 @@ MATERIAL_ICONS = ImageFont.truetype(
 WIFI = [b"\ue1da", b"\uebe4", b"\uebe1", b"\uf065"]
 
 
-@dataclass
-class SensorOnDisplay:
-    position: int
-    path: str
-    value: Optional[float] = None
-
-
 SENSORS = [
-    SensorOnDisplay(0, "/tmp/dht/temp"),
-    SensorOnDisplay(57, "/tmp/ds/temp"),
-    SensorOnDisplay(110, "/tmp/dht/humidity"),
+    (0, DHT_TEMP),
+    (57, DS_TEMP),
+    (110, DHT_HUM),
 ]
 
 
@@ -93,27 +86,15 @@ signal.signal(signal.SIGTERM, exit)
 signal.signal(signal.SIGINT, exit)
 
 
-def get_sensor_data(
-    path: str,
-    cast: Callable[[Any], Any] = next,
-    val: Callable[[str], Any] = lambda x: float(x),
-):
-    try:
-        with open(path) as f:
-            return cast(map(val, list(f.readlines())))
-    except:
-        return cast(map(val, [0]))  # type: ignore
-
-
-def update_sensor(s: SensorOnDisplay):
-    new_value = get_sensor_data(s.path)
-    if not s.value or new_value != s.value:
-        DRAW.rectangle((4, 15 + s.position, 89, 58 + s.position), fill=1)
-        s.value = new_value
-        length = DRAW.textlength(f"{s.value:0.1f}", font=BITTER_40)
+def update_sensor(position: int, sensor: Sensor):
+    new_value = sensor.read()
+    if not sensor.value or new_value != sensor.value:
+        DRAW.rectangle((4, 15 + position, 89, 58 + position), fill=1)
+        sensor.set(new_value)
+        length = DRAW.textlength(f"{sensor.value:0.1f}", font=BITTER_40)
         DRAW.text(  # type: ignore
-            (89 - length, s.position),
-            f"{s.value:0.1f}",
+            (89 - length, position),
+            f"{sensor.value:0.1f}",
             font=BITTER_40,
         )
 
@@ -156,7 +137,6 @@ def main():
     DRAW.text((10, 170), "Topení", font=NOTO)  # type: ignore
 
     LOGGER.info("Serving content")
-    heat = None
     try:
         while True:
             now = datetime.now().strftime("%H:%M")
@@ -166,26 +146,29 @@ def main():
             DRAW.text((110, -2), quality, font=MATERIAL_ICONS)  # type: ignore
 
             for s in SENSORS:
-                update_sensor(s)
+                update_sensor(*s)
 
-            heat_new = get_sensor_data("/tmp/relay/on", val=lambda m: m == "true\n")
-            if heat != heat_new:
-                heat = heat_new
+            heat_new = HEATER_POWER.read()
+            if HEATER_POWER.value != heat_new:
+                HEATER_POWER.set(heat_new)
                 DRAW.rounded_rectangle(
-                    (27, 190, 57, 204), radius=7, outline=0, fill=not heat
+                    (27, 190, 57, 204), radius=7, outline=0, fill=not HEATER_POWER.value
                 )
-                DRAW.text((35, 190), "On", font=NOTO, fill=heat)  # type: ignore
+                DRAW.text((35, 190), "On", font=NOTO, fill=HEATER_POWER.value)  # type: ignore
                 DRAW.rounded_rectangle(
-                    (65, 190, 95, 204), radius=7, outline=0, fill=heat
+                    (65, 190, 95, 204),
+                    radius=7,
+                    outline=0,
+                    fill=bool(HEATER_POWER.value),
                 )
-                DRAW.text((72, 190), "Off", font=NOTO, fill=not heat)  # type: ignore
+                DRAW.text((72, 190), "Off", font=NOTO, fill=not HEATER_POWER.value)  # type: ignore
 
-            history = get_sensor_data("/tmp/dht/history", list)
+            history = DHT_HST.read()
             for idx, i in enumerate(history):
                 DRAW.point((idx + 10, 250 - round((i - 10))))
 
             LOGGER.info(
-                f"above={SENSORS[0].value:0.1f} °C, below={SENSORS[1].value:0.1f} °C, humidity={SENSORS[2].value:0.0f} %, heat={heat}, history={len(history)}"
+                f"above={SENSORS[0][1].value:0.1f} °C, below={SENSORS[1][1].value:0.1f} °C, humidity={SENSORS[2][1].value:0.0f} %, heat={HEATER_POWER.value}, history={len(history)}"
             )
             DISPLAY.displayPartial(DISPLAY.getbuffer(IMAGE))  # type: ignore
 

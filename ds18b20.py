@@ -1,12 +1,10 @@
-import os
 from time import sleep
 from typing import Callable
 from utils.environment import SENSOR_POOLING, is_rpi
 from utils.logging import assert_mode, get_logger
+from utils.sensors import DS_TEMP
 
 LOGGER = get_logger("ds18b20")
-
-PATH = "/tmp/ds"
 
 
 def main():
@@ -31,8 +29,8 @@ def main():
         while True:
             temperature = get_data()
             LOGGER.info(f"temp={temperature:0.1f}")
-            with open(f"{PATH}/temp", "w") as f:
-                f.write(f"{temperature}\n")
+            DS_TEMP.set(temperature)
+            DS_TEMP.save()
             sleep(SENSOR_POOLING)
     except KeyboardInterrupt:
         LOGGER.info("exiting")
@@ -45,5 +43,4 @@ def main():
 
 if __name__ == "__main__":
     assert_mode(LOGGER)
-    os.makedirs(PATH, exist_ok=True)
     main()
