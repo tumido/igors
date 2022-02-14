@@ -1,0 +1,13 @@
+[Unit]
+Description=Web Igor
+After=network.target
+
+[Service]
+User=thewatch
+Group=www-data
+WorkingDirectory=/opt/igors
+ExecStart=uwsgi --ini web.ini
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
