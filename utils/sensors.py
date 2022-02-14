@@ -29,7 +29,7 @@ class Sensor:
         if isinstance(self.value, deque):
             self.cast = list
         elif isinstance(self.value, bool):
-            self.mapping: Callable[[str], Any] = lambda x: x == "on"
+            self.mapping: Callable[[str], Any] = lambda x: x == "True\n"
 
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.touch(exist_ok=True)
@@ -43,7 +43,7 @@ class Sensor:
     def read(self) -> Any:
         with open(self.path) as f:
             try:
-                return self.cast(map(self.mapping, list(f.readlines())))
+                return self.cast(map(self.mapping, f.readlines()))
             except StopIteration:
                 return self.value
 

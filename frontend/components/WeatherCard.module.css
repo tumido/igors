@@ -21,9 +21,9 @@
 .value {
   text-align: right;
   position: absolute;
-  top: 30px;
-  right: 60px;
-  font-size: 7rem;
+  top: 50px;
+  right: 55px;
+  font-size: 5rem;
   margin: 0;
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   font-weight: 400;
@@ -34,7 +34,7 @@
 .unit {
   text-align: right;
   position: absolute;
-  top: 50px;
+  top: 64px;
   right: 25px;
   font-size: 2rem;
   margin: 0;

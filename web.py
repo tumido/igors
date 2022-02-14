@@ -28,6 +28,8 @@ def igors():
         )
 
     HEATER_POWER.set(request.json.get("heater"))
+    HEATER_POWER.save()
+
     return jsonify(message="Success")
 
 

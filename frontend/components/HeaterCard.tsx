@@ -12,9 +12,9 @@ type PostPayload = {
   timeout?: Number
 }
 
-const WeatherCard = ({ value }: HeaterCardProps) => {
+const WeatherCard = ({ value = false }: HeaterCardProps) => {
   const [ensureTime, setEnsureTime] = useState<Date | null>(new Date(0))
-  const [showTimePicker, setShowTimePicker] = useState(false)
+  const [showTimePicker, setShowTimePicker] = useState(value)
   const { mutate } = useSWRConfig()
 
   const handleHeaterChange = (value: PostPayload) => {
@@ -28,9 +28,12 @@ const WeatherCard = ({ value }: HeaterCardProps) => {
   }
 
   const handleClick: MouseEventHandler = (_event) => {
-    if (value) {
+    if (showTimePicker) {
+      setShowTimePicker(false)
+    } else if (value) {
       handleHeaterChange({ heater: false })
     } else {
+      setEnsureTime(new Date(0))
       setShowTimePicker(true)
     }
   }
@@ -40,7 +43,6 @@ const WeatherCard = ({ value }: HeaterCardProps) => {
     if (date) {
       handleHeaterChange({ heater: true, timeout: date.getMinutes() })
     }
-    setShowTimePicker(false)
   }
   const toggleDrawer =
     (open: boolean) => (event: KeyboardEvent | MouseEvent) => {
@@ -51,7 +53,6 @@ const WeatherCard = ({ value }: HeaterCardProps) => {
       ) {
         return
       }
-
       setShowTimePicker(open)
     }
 
@@ -65,7 +66,7 @@ const WeatherCard = ({ value }: HeaterCardProps) => {
       </span>
       <Drawer
         anchor="right"
-        open={showTimePicker}
+        open={!!showTimePicker}
         onClose={toggleDrawer(false)}
       >
         <TimePicker value={ensureTime} onChange={handleSetEnsureTime} />
