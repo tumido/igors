@@ -10,7 +10,7 @@ export type WeatherCardProps = {
 const WeatherCard = ({ value, icon: Icon, type }: WeatherCardProps) => {
   return (
     <div className={styles.widget}>
-      <span className={styles.value}>{value}</span>
+      <span className={styles.value}>{value.toFixed(1)}</span>
       <span className={styles.unit}>{type == 'temperature' ? '˚C' : '%'}</span>
       <span className={styles.icon}>{Icon && <Icon />}</span>
     </div>
