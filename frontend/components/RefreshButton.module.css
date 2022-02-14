@@ -1,0 +1,15 @@
+.button {
+  align-self: flex-end;
+  margin-left: -60px;
+  padding: 10px;
+  z-index: 1;
+  cursor: pointer;
+  transition: transform 0.5s;
+}
+.button:active {
+  transform: rotate(-360deg);
+  transition: 0s;
+}
+.button > svg {
+  font-size: 3rem;
+}

@@ -10,6 +10,7 @@ import WaterIcon from '@mui/icons-material/Water'
 import ReportGmailerrorredOutlinedIcon from '@mui/icons-material/ReportGmailerrorredOutlined'
 import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined'
 import Loading from '../components/Loading'
+import RefreshButton from '../components/RefreshButton'
 
 type IgorsData = {
   heater: Boolean | null
@@ -47,7 +48,7 @@ const Home: NextPage = () => {
       <main>
         <Grid
           container
-          style={{ minHeight: '100vh' }}
+          style={{ minHeight: '100vh', padding: '30px' }}
           justifyContent="center"
           alignItems="center"
         >
@@ -80,6 +81,7 @@ const Home: NextPage = () => {
                 alignItems="center"
               >
                 <HeaterCard value={igorsData.heater} />
+                <RefreshButton />
               </Grid>
             </Grid>
           </Container>

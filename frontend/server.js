@@ -8,7 +8,10 @@ const app = next({ dev })
 const handle = app.getRequestHandler()
 
 const apiPath = {
-  target: 'http://127.0.0.1:5000',
+  target:
+    process.env.NODE_ENV === 'stage'
+      ? 'http://igor.lan'
+      : 'http://127.0.0.1:5000',
   pathRewrite: {
     '^/api': '/api',
   },
