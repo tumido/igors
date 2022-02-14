@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import useSWR from 'swr'
-import { IgorsData } from './api/igors'
 import { Container, Grid } from '@mui/material'
 import WeatherCard, { WeatherCardProps } from '../components/WeatherCard'
 import HeaterCard from '../components/HeaterCard'
@@ -11,6 +10,13 @@ import WaterIcon from '@mui/icons-material/Water'
 import ReportGmailerrorredOutlinedIcon from '@mui/icons-material/ReportGmailerrorredOutlined'
 import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined'
 import Loading from '../components/Loading'
+
+type IgorsData = {
+  heater: Boolean | null
+  above: Number
+  below: Number
+  humidity: Number
+}
 
 async function fetcher<JSON = any>(
   input: RequestInfo,
