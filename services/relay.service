@@ -1,0 +1,11 @@
+[Unit]
+Description=Relay Igor
+
+[Service]
+User=thewatch
+WorkingDirectory=/opt/igors
+ExecStart=python relay.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
